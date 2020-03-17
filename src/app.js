@@ -23,6 +23,10 @@ app.use(function errorHandler(error, req, res, next) {
   res.status(500).json(response)
 })
 
+app.get('/articles', (req, res, next) => {
+  res.send('All articles')
+})
+
 app.get('/', (req, res) => {
   res.send('Hello, world!')
 })
