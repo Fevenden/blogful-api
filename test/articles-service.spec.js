@@ -11,7 +11,7 @@ describe.only('Articles Endpoints', function() {
       client: 'pg',
       connection: process.env.TEST_DB_URL,
     })
-    app.set('db', db) //ask akiva what this does
+    app.set('db', db)
   })
 
   after('disconnect from db', () => db.destroy())
