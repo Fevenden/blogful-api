@@ -25,14 +25,6 @@ app.use(function errorHandler(error, req, res, next) {
   res.status(500).json(response)
 })
 
-// const serializeArticle = article => ({
-//   id: article.id,
-//   title: article.title,
-//   style: article.style,
-//   content: article.content,
-//   date_published: new Date(article.date_published)
-// })
-
 app.get('/articles', (req, res, next) => {
   const knexInstance = req.app.get('db')
   ArticlesService.getAllArticles(knexInstance)
@@ -52,6 +44,7 @@ app.post('/articles', jsonParser, (req, res, next) => {
     .then(article => {
       res
         .status(201)
+        .location(`/articles/${article.id}`)
         .json(article)
     })
     .catch(next)
