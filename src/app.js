@@ -26,4 +26,8 @@ app.use(function errorHandler(error, req, res, next) {
 
 app.use('/articles', articlesRouter)
 
+app.get('/', (req, res) => {
+  res.send('Hello, world!')
+})
+
 module.exports = app
