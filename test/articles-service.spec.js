@@ -13,9 +13,9 @@ describe.only('Articles Endpoints', function() {
     })
     app.set('db', db)
   })
-
+  
   after('disconnect from db', () => db.destroy())
-
+  
   before('clean the table', () => db('blogful_articles').truncate())
 
   afterEach('cleanup', () => db('blogful_articles').truncate())
@@ -77,6 +77,7 @@ describe.only('Articles Endpoints', function() {
   
   describe.only(`POST /articles`, () => {
     it(`creates an article, responds with 201 and the new article`, function() {
+      this.retries(3)
       const newArticle = {
         title: 'Test new article',
         style: 'Listicle',
@@ -96,7 +97,7 @@ describe.only('Articles Endpoints', function() {
           const actual = new Date(res.body.date_published).toLocaleString()
           expect(actual).to.eql(expected)
         })
-        .then(postRes => //ask why using {} in this function causes it to pass but it fails without them.
+        .then(postRes => 
           supertest(app)
             .get(`/articles/${postRes.body.id}`)
             .expect(postRes.body)

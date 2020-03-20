@@ -7,7 +7,7 @@ const { NODE_ENV } = require('./config');
 const ArticlesService = require('./articles-service');
 
 const app = express()
-const jsonParser = express.json() // ask akiva what a jsonParser is. what is it?
+const jsonParser = express.json()
 
 const morganOption = (NODE_ENV === 'production')
   ? 'tiny'
@@ -59,7 +59,13 @@ app.get('/articles/:article_id', (req, res, next) => {
           error: { message: `Article doesn't exist` }
         })
       } 
-      res.json(article)
+      res.json({
+        id: article.id,
+        title: article.title,
+        style: article.style,
+        content: article.content,
+        date_published: new Date(article.date_published)
+      })
     })
     .catch(next)
 })
