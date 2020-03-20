@@ -75,3 +75,28 @@ describe.only('Articles Endpoints', function() {
     })
   })
 })
+
+describe.only(`POST /articles`, () => {
+  it(`creates an article, responds with 201 and the new article`, function() {
+    const newArticle = {
+      title: 'Test new article',
+      style: 'Listicle',
+      content: 'Test new article content...'
+    }
+    return supertest(app)
+      .post('/articles')
+      .send(newArticle)
+      .expect(201)
+      .expect(res => {
+        expect(res.body.title).to.eql(newArticle.title)
+        expect(res.body.style).to.eql(newArticle.style)
+        expect(res.body.content).to.eql(newArticle.content)
+        expect(res.body).to.have.property('id')
+      })
+      .then(postRes => //ask why using {} in this function causes it to pass but it fails without them.
+        supertest(app)
+          .get(`/articles/${postRes.body.id}`)
+          .expect(postRes.body)
+      )
+  })
+})
