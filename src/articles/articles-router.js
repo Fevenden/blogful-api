@@ -1,4 +1,5 @@
 const express = require('express')
+const xss = require('xss')
 const ArticlesService = require('./articles-service')
 
 const articlesRouter = express.Router()
@@ -18,6 +19,15 @@ articlesRouter
   .post(jsonParser, (req, res, next) => {
     const { title, content, style } = req.body
     const newArticle = { title, content, style }
+
+    for (const [key, value] of Object.entries(newArticle)) {
+      if(value == null) {
+        return res.status(400).json({
+          error: { message: `Missing '${key}' in request body`} // ask Akiva how I could write this with ternary operators
+        })
+      }
+    }
+
     ArticlesService.insertArticle(
       req.app.get('db'),
       newArticle
@@ -42,7 +52,13 @@ articlesRouter
             error: { message: `Article doesn't exist` }
           })
         }
-        res.json(article)
+        res.json({
+          id: article.id,
+          style: article.style,
+          title: xss(article.title), //sanitize the title with xss *requires xss be installed*
+          content: xss(article.content), //sanitize content 
+          date_published: article.date_published
+        })
       })
       .catch(next)
   })

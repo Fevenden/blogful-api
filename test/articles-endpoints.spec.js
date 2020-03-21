@@ -73,16 +73,43 @@ describe('Articles Endpoints', function() {
           .expect(200, expectedArticle)
       })
     })
+
+    context(`Given an XSS attack article`, () => {
+      const maliciousArticle = {
+        id: 911,
+        title: 'Naughty naughty very naughty <script>alert("xss");</script>',
+        style: 'How-to',
+        content: `Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.`
+      }
+      
+      beforeEach('insert malicious article', () => {
+        return db 
+          .into('blogful_articles')
+          .insert([ maliciousArticle ])
+      })
+
+      it(`removes XSS attack content`, () => {
+        return supertest(app)
+          .get(`/articles/${maliciousArticle.id}`)
+          .expect(200)
+          .expect(res => {
+            expect(res.body.title).to.eql('Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;')
+            expect(res.body.content).to.eql(`Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`)
+          })
+      })
+    })
   })
   
   describe(`POST /articles`, () => {
     it(`creates an article, responds with 201 and the new article`, function() {
       this.retries(3)
+      
       const newArticle = {
         title: 'Test new article',
         style: 'Listicle',
         content: 'Test new article content...'
       }
+      
       return supertest(app)
         .post('/articles')
         .send(newArticle)
@@ -102,6 +129,51 @@ describe('Articles Endpoints', function() {
             .get(`/articles/${postRes.body.id}`)
             .expect(postRes.body)
         )
+    })
+
+    const requiredFields = ['title', 'style', 'content']
+
+    requiredFields.forEach(field => {
+      const newArticle = {
+        title: 'Test new article',
+        style: 'Listicle',
+        content: 'Test new article content...'
+      }
+
+      it(`responds with 400 and an error message when the '${field}' is missing`, () => {
+        delete newArticle[field]
+
+        return supertest(app)
+          .post('/articles')
+          .send(newArticle)
+          .expect(400, {
+            error: { message: `Missing '${field}' in request body` }
+          })
+      })
+    })
+
+    context(`Given an XSS attack article`, () => {
+      const maliciousArticle = {
+        id: 911,
+        title: 'Naughty naughty very naughty <script>alert("xss");</script>',
+        style: 'How-to',
+        content: `Bad image <img src="https://url.to.file.which/does-not.exist" onerror="alert(document.cookie);">. But not <strong>all</strong> bad.`
+      }
+      
+      it(`Removes XSS attack content from POST request`, () => {
+        return supertest(app)
+          .post('/articles')
+          .send(maliciousArticle)
+          .then(pRes => 
+            supertest(app)
+              .get(`/articles/${pRes.body.id}`)
+              .expect(200)
+              .expect(res => {
+                expect(res.body.title).to.eql('Naughty naughty very naughty &lt;script&gt;alert(\"xss\");&lt;/script&gt;')
+                expect(res.body.content).to.eql(`Bad image <img src="https://url.to.file.which/does-not.exist">. But not <strong>all</strong> bad.`)
+              })
+          )
+      })
     })
   })
 })
