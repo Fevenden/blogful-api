@@ -24,15 +24,10 @@ app.use(function errorHandler(error, req, res, next) {
   res.status(500).json(response)
 })
 
-app.use('/articles', articlesRouter)
+app.use('/api/articles', articlesRouter)
 
 app.get('/', (req, res) => {
   res.send('Hello, world!')
 })
-
-app.get('/xss', (req, res) => {
-  res.cookie('secretToken', '1234567890');
-  res.sendFile(__dirname + '/xss-example.html');
-});
 
 module.exports = app
