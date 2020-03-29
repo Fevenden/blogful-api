@@ -2,6 +2,9 @@
   "name": "express-boilerplate",
   "version": "1.0.0",
   "description": "",
+  "engines": {
+    "node": "12.14.1"
+  },
   "main": "index.js",
   "scripts": {
     "test": "mocha --require test/setup.js",
