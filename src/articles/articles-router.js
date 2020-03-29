@@ -96,7 +96,7 @@ articlesRouter
       req.params.article_id,
       articleToUpdate
     )
-      .then(numRowsAffected => { // ask akiva what numRowsAffected are.
+      .then(numRowsAffected => {
         res.status(204).end()
       })
       .catch(next)

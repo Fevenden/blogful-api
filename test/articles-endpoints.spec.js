@@ -10,7 +10,7 @@ describe('Articles Endpoints', function() {
 
     db = knex({
       client: 'pg',
-      connection: process.env.TEST_DB_URL,
+      connection: process.env.TEST_DATABASE_URL,
     })
     app.set('db', db)
 
@@ -143,7 +143,7 @@ describe('Articles Endpoints', function() {
 
   describe(`POST /api/articles`, () => {
     const testUsers = makeUsersArray();
-    beforeEach('insert malicious article', () => {
+    beforeEach('insert article', () => {
       return db
         .into('blogful_users')
         .insert(testUsers)
@@ -255,7 +255,7 @@ describe('Articles Endpoints', function() {
       it(`responds with 404`, () => {
         const articleId = 123456
         return supertest(app)
-          .delete(`/api/articles/${articleId}`)
+          .patch(`/api/articles/${articleId}`)
           .expect(404, { error: { message: `Article doesn't exist` } })
       })
     })
